@@ -11,6 +11,8 @@ require(__dirname + '/customers/customers.js');
 require(__dirname + '/products/products-module.js');
 require(__dirname + '/products/products.js');
 require(__dirname + '/services/http-service.js');
+require(__dirname + '/services/auth-service.js');
+require(__dirname + '/services/error-service.js');
 
 
 (function() {
@@ -26,6 +28,10 @@ require(__dirname + '/services/http-service.js');
       templateUrl: './templates/product-template.html'
     }).when('/', {
       templateUrl: './templates/customer-template.html'
+    }).when('/signup', {
+      templateUrl: './templates/signup-in.html',
+      controller: 'CustomerController',
+      controllerAs: 'custctrl'
     })
   }]);
 })();

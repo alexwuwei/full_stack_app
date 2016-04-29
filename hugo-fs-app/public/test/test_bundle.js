@@ -176,6 +176,8 @@
 	__webpack_require__(15);
 	__webpack_require__(16);
 	__webpack_require__(17);
+	__webpack_require__(18);
+	__webpack_require__(19);
 
 
 	(function() {
@@ -191,6 +193,10 @@
 	      templateUrl: './templates/product-template.html'
 	    }).when('/', {
 	      templateUrl: './templates/customer-template.html'
+	    }).when('/signup', {
+	      templateUrl: './templates/signup-in.html',
+	      controller: 'CustomerController',
+	      controllerAs: 'custctrl'
 	    })
 	  }]);
 	})();
@@ -32551,7 +32557,7 @@
 
 	(function() {
 	  angular.module('customers')
-	  .controller('CustomerController', ['$http', 'ResourceService', CustomerController])
+	  .controller('CustomerController', ['AuthService', '$http', '$location', 'ErrorService', 'ResourceService', CustomerController])
 	  .directive('customerHeader', function() {
 	    return {
 	      restrict: 'A',
@@ -32559,9 +32565,9 @@
 	    };
 	  });
 
-	  function CustomerController ($http, ResourceService) {
+	  function CustomerController (AuthService, $http, $location, ErrorService, ResourceService) {
 	    const customersRoute = 'http://localhost:3000/customers';
-	    const customerResource = ResourceService('customers')
+	    const customerResource = ResourceService('customers');
 	    this.customers = [];
 	  //customer routes
 	    //get customers route
@@ -32609,6 +32615,26 @@
 	        this.customers = this.customers.filter((c) => c._id != customer._id);
 	      });
 	    };
+	    this.signUp = function(user) {
+	      AuthService.createUser(user, function(err, res) {
+	        if (err) return this.error = ErrorService('problem creating user');
+	        this.error = ErrorService(null);
+	        $location.path('/customers');
+	      });
+	    };
+	    this.signOut = function() {
+	      AuthService.signOut(() => {
+	        $location.path('/signup');
+	      });
+	    };
+	    this.signIn = function(user) {
+	      AuthService.signIn(user, (err, res) => {
+	        if (err) return this.error = ErrorService('Problem signing in');
+	        this.error = ErrorService(null);
+	        $location.path('/customers');
+	      });
+	    };
+	    //toggle form goes here
 	  }
 
 
@@ -32725,6 +32751,68 @@
 
 	  }]);
 	})();
+
+
+/***/ },
+/* 18 */
+/***/ function(module, exports) {
+
+	module.exports = function(app) {
+	  app.factory('AuthService', ['$http', '$window', function($http, $window) {
+	    var token;
+	    var url = 'http://localhost:3000';
+	    var auth = {
+	      createUser(user, cb) {
+	        cb || function() {};
+	        $http.post(url + '/signup', user)
+	        .then((res) => {
+	          token = $window.localStorage.token = res.data.token;
+	          cb(null, res)
+	        }, (err) => {
+	          cb(err)
+	        })
+	      },
+	      getToken() {
+	        return token || $window.localStorage.token;
+	      },
+	      signOut(cb) {
+	        token = null;
+	        $window.localStorage.token = null;
+	        if (cb) cb();
+	      },
+	      signIn(user, cb) {
+	        cb || function(){};
+	        $http.get(url + '/signin', {
+	          headers: {
+	            authorization: 'Basic' + btoa(user.email + ':' + user.password)
+	          }
+	        }).then((res) => {
+	          token = $window.localStorage.token = res.data.token;
+	          cb(null, res);
+	        }, (err) => {
+	          cb(err);
+	        })
+	      }
+	    }
+	    return auth;
+	  }])
+	}
+
+
+/***/ },
+/* 19 */
+/***/ function(module, exports) {
+
+	module.exports = function(app) {
+	  app.factory('ErrorService', function() {
+	    var error;
+	    return function(newError) {
+	      if (newError === null) return error = null;
+	      if (!newError) return error;
+	      return error = newError;
+	    };
+	  });
+	};
 
 
 /***/ }

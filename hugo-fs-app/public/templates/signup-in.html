@@ -1,0 +1,17 @@
+<section>
+  <h1 ng-if="custctrl.error">{{custctrl.error}}</h1>
+  <form ng-submit="custctrl.signUp(newUser)">
+    <input type="text" placeholder="email" ng-model="newUser.email">
+    <input type="text" placeholder="username" ng-model="newUser.username">
+    <input type="password" placeholder="password" ng-model="newUser.password">
+    <button type="submit">Sign Up</button>
+  </form>
+  <form ng-submit="custctrl.signIn(user)">
+    <input type="text" placeholder="email" ng-model="user.email">
+    <input type="text" placeholder="username" ng-model="user.username">
+    <input type="password" placeholder="password" ng-model="user.password">
+    <button type="submit">Sign In</button>
+  </form>
+
+
+</section>

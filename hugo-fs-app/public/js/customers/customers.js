@@ -1,6 +1,6 @@
 (function() {
   angular.module('customers')
-  .controller('CustomerController', ['$http', 'ResourceService', CustomerController])
+  .controller('CustomerController', ['AuthService', '$http', '$location', 'ErrorService', 'ResourceService', CustomerController])
   .directive('customerHeader', function() {
     return {
       restrict: 'A',
@@ -8,9 +8,9 @@
     };
   });
 
-  function CustomerController ($http, ResourceService) {
+  function CustomerController (AuthService, $http, $location, ErrorService, ResourceService) {
     const customersRoute = 'http://localhost:3000/customers';
-    const customerResource = ResourceService('customers')
+    const customerResource = ResourceService('customers');
     this.customers = [];
   //customer routes
     //get customers route
@@ -58,6 +58,26 @@
         this.customers = this.customers.filter((c) => c._id != customer._id);
       });
     };
+    this.signUp = function(user) {
+      AuthService.createUser(user, function(err, res) {
+        if (err) return this.error = ErrorService('problem creating user');
+        this.error = ErrorService(null);
+        $location.path('/customers');
+      });
+    };
+    this.signOut = function() {
+      AuthService.signOut(() => {
+        $location.path('/signup');
+      });
+    };
+    this.signIn = function(user) {
+      AuthService.signIn(user, (err, res) => {
+        if (err) return this.error = ErrorService('Problem signing in');
+        this.error = ErrorService(null);
+        $location.path('/customers');
+      });
+    };
+    //toggle form goes here
   }
 
 
